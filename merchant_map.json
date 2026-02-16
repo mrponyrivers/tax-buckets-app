@@ -1,0 +1,44 @@
+{
+  "uber": {
+    "bucket": "Business",
+    "category": "Transportation",
+    "subcategory": "Uber",
+    "confidence": 0.9
+  },
+  "spotify": {
+    "bucket": "Business",
+    "category": "Subscriptions",
+    "subcategory": "Spotify",
+    "confidence": 0.85
+  },
+  "foreign exch rt adj": {
+    "bucket": "Business",
+    "category": "Fees (bank/FX/transfer)",
+    "subcategory": "FX Fee",
+    "confidence": 0.95
+  },
+  "deliveroo": {
+    "bucket": "Business",
+    "category": "Meals",
+    "subcategory": "Client Meals",
+    "confidence": 0.85
+  },
+  "doordash": {
+    "bucket": "Business",
+    "category": "Meals",
+    "subcategory": "Client Meals",
+    "confidence": 0.85
+  },
+  "wire transfer": {
+    "bucket": "Business",
+    "category": "Fees (bank/FX/transfer)",
+    "subcategory": "Wire Transfer",
+    "confidence": 0.8
+  },
+  "lyft": {
+    "bucket": "Business",
+    "category": "Transportation",
+    "subcategory": "Lyft",
+    "confidence": 0.9
+  }
+}
