@@ -453,6 +453,13 @@ def extract_text_from_pdf(file_bytes: bytes) -> str:
                 text_pages.append(txt)
     return "\n".join(text_pages)
 
+def load_local_sample_statement(path: str = "sample_data/sample_statement.txt") -> str:
+    """Load a sample statement from disk for the live demo / quick start."""
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read()
+    except Exception:
+        return ""
 
 # ============================================================
 # Exports
@@ -546,6 +553,46 @@ nav = st.tabs(["Import / Paste", "Rules", "Review + Export", "Reports"])
 # ============================================================
 with nav[0]:
     st.subheader("Import options")
+    # ----------------------------
+    # Quick Start (Live Demo)
+    # ----------------------------
+    with st.expander("Quick Start (Live Demo)", expanded=True):
+        st.write(
+            "Load the included sample statement and auto-run the parser so you can test the full flow in 30 seconds."
+        )
+
+        cqs1, cqs2, cqs3 = st.columns([1, 1, 2])
+
+        with cqs1:
+            if st.button("Load sample into Paste box", key="qs_load_sample"):
+                sample_text = load_local_sample_statement()
+                if sample_text.strip():
+                    st.session_state["statement_text_paste"] = sample_text
+                    st.success("Sample loaded into the Paste box below.")
+                else:
+                    st.warning("Could not find sample_data/sample_statement.txt (or it is empty).")
+
+        with cqs2:
+            if st.button("Load + Parse sample", key="qs_load_parse_sample"):
+                sample_text = load_local_sample_statement()
+                if sample_text.strip():
+                    st.session_state["statement_text_paste"] = sample_text
+                    # Use the same labels as your paste section defaults
+                    acct = st.session_state.get("acct_label_paste", "Chase Business (9913)")
+                    yr = int(st.session_state.get("year_paste", 2025))
+                    df_raw = parse_chase_statement_text(sample_text, account_label=acct, year=yr)
+                    st.session_state["df_raw"] = df_raw
+                    st.session_state.pop("df_enriched", None)
+                    st.session_state.pop("df_review", None)
+                    st.success(f"Parsed {len(df_raw)} rows from the sample. Now open 'Review + Export'.")
+                else:
+                    st.warning("Could not find sample_data/sample_statement.txt (or it is empty).")
+
+        with cqs3:
+            st.caption(
+                "Tip: After parsing, go to **Review + Export** → edit categories → export CSV/XLSX. "
+                "Then check **Reports** for spend breakdowns."
+            )
 
     colL, colR = st.columns([1, 1], gap="large")
 
@@ -553,7 +600,11 @@ with nav[0]:
         st.markdown("### A) Paste Chase statement text")
         account_label = st.text_input("Account label", value="Chase Business (9913)", key="acct_label_paste")
         year = st.number_input("Year", min_value=2000, max_value=2100, value=2025, step=1, key="year_paste")
-        statement_text = st.text_area("Paste statement text here", height=260)
+        statement_text = st.text_area(
+        "Paste statement text here",
+        height=260,
+        key="statement_text_paste",
+        )
 
         if st.button("Parse pasted statement", key="parse_paste_btn"):
             df_raw = parse_chase_statement_text(statement_text, account_label=account_label, year=int(year))
