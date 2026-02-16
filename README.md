@@ -2,6 +2,8 @@
 
 Upload or paste bank/credit-card statements → auto-categorize with rules → review/edit → export CSV/XLSX for accountant / QuickBooks workflows.
 
+Live demo: https://mrponyrivers-tax-buckets-app.streamlit.app/
+
 ## Features
 - Paste Chase statement text OR upload CSV/XLSX/PDF
 - Rule-based auto-categorization (editable rules table)
