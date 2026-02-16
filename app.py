@@ -528,18 +528,16 @@ def import_session_payload(payload: Dict) -> Tuple[Optional[pd.DataFrame], Optio
 
 
 # ============================================================
-# Streamlit UI (polished, no regression)
+# Streamlit UI
 # ============================================================
 st.set_page_config(page_title="Tax Buckets — Statement Parser + Categorizer", layout="wide")
 
 st.title("Tax Buckets — QuickBooks-style Statement Parser + Categorizer")
 st.write("**Goal:** paste/upload statements → auto-categorize → review → export CSV for accountant/QB workflows.")
 
-# init rules
 if "rules" not in st.session_state:
     st.session_state["rules"] = default_rules()
 
-# ---------- Top Nav ----------
 nav = st.tabs(["Import / Paste", "Rules", "Review + Export", "Reports"])
 
 
@@ -551,12 +549,10 @@ with nav[0]:
 
     colL, colR = st.columns([1, 1], gap="large")
 
-    # A) Paste
     with colL:
         st.markdown("### A) Paste Chase statement text")
         account_label = st.text_input("Account label", value="Chase Business (9913)", key="acct_label_paste")
         year = st.number_input("Year", min_value=2000, max_value=2100, value=2025, step=1, key="year_paste")
-
         statement_text = st.text_area("Paste statement text here", height=260)
 
         if st.button("Parse pasted statement", key="parse_paste_btn"):
@@ -566,7 +562,6 @@ with nav[0]:
             st.session_state.pop("df_review", None)
             st.success(f"Parsed {len(df_raw)} rows from pasted text.")
 
-    # B) Upload
     with colR:
         st.markdown("### B) Upload file (CSV / XLSX / PDF)")
         st.caption("PDF parsing is best-effort: we extract text and run the same parser.")
@@ -591,7 +586,6 @@ with nav[0]:
                 st.error("Unsupported file type.")
 
             if df_raw is not None:
-                # normalize columns if file is a transaction export
                 if "Original Description" not in df_raw.columns:
                     cols = {c.lower(): c for c in df_raw.columns}
                     if "memo/description" in cols:
@@ -627,7 +621,7 @@ with nav[0]:
     if "df_raw" in st.session_state and isinstance(st.session_state["df_raw"], pd.DataFrame) and not st.session_state["df_raw"].empty:
         st.markdown("### Parsed preview")
         st.caption(f"Rows: {len(st.session_state['df_raw'])}")
-        st.dataframe(st.session_state["df_raw"].head(200), width='stretch')
+        st.dataframe(st.session_state["df_raw"].head(200), width="stretch")
     else:
         st.info("Upload or paste a statement to begin.")
 
@@ -639,7 +633,6 @@ with nav[1]:
     st.subheader("Rules")
     st.caption("Edit matching rules. Higher priority rules at the top. First match wins.")
 
-    # Save/Load + rules downloads
     with st.expander("Save / Load Session (keeps your review edits)", expanded=False):
         colA, colB = st.columns(2)
         with colA:
@@ -692,7 +685,7 @@ with nav[1]:
         edited_rules = st.data_editor(
             rules_df,
             num_rows="dynamic",
-            width='stretch',
+            width="stretch",
             key="rules_editor",
         )
 
@@ -741,14 +734,12 @@ with nav[2]:
         st.warning("Import a statement first (Import / Paste tab).")
         st.stop()
 
-    # Build enriched once
     if "df_enriched" not in st.session_state or st.session_state["df_enriched"] is None or st.session_state["df_enriched"].empty:
         st.session_state["df_enriched"] = enrich_transactions(st.session_state["df_raw"], rules=st.session_state["rules"])
 
     if "df_review" not in st.session_state or st.session_state["df_review"] is None or st.session_state["df_review"].empty:
         st.session_state["df_review"] = st.session_state["df_enriched"].copy()
 
-    # Filters
     col1, col2, col3 = st.columns([1.2, 1.2, 1.6])
     with col1:
         show_needs_review_only = st.checkbox("Needs Review only", value=False)
@@ -771,7 +762,6 @@ with nav[2]:
             | view_df["Original Description"].astype(str).str.lower().str.contains(s, na=False)
         ]
 
-    # Smarter category dropdown: defaults + what you already used + loan cats
     existing_cats = (
         st.session_state["df_review"]["Category"].dropna().astype(str).str.strip().tolist()
         if "df_review" in st.session_state and isinstance(st.session_state["df_review"], pd.DataFrame)
@@ -787,7 +777,7 @@ with nav[2]:
 
     edited = st.data_editor(
         view_df,
-        width='stretch',
+        width="stretch",
         num_rows="dynamic",
         column_config={
             "Bucket": st.column_config.SelectboxColumn("Bucket", options=DEFAULT_BUCKETS, required=False),
@@ -803,7 +793,7 @@ with nav[2]:
         key="review_editor",
     )
 
-    # apply manual override immediately in-memory so it saves correctly
+    # Apply override in the edited view so the save uses the final Category value
     edited = apply_manual_override(edited, manual_col="Category_Manual", target_col="Category")
 
     c1, c2, c3 = st.columns([1, 1, 2])
@@ -836,8 +826,8 @@ with nav[2]:
             base_map = base.set_index("_k")
 
             up_cols = ["Bucket", "Category", "Subcategory", "Project", "Assistant", "Notes", "Merchant", "Category_Manual"]
-
             common_idx = base_map.index.intersection(edited_map.index)
+
             if len(common_idx) == 0:
                 st.info("No matching rows to update.")
             else:
@@ -898,7 +888,7 @@ with nav[2]:
         )
 
     with st.expander("Preview (QB bank feed)", expanded=False):
-        st.dataframe(qb_df.head(100), width='stretch')
+        st.dataframe(qb_df.head(100), width="stretch")
 
 
 # ============================================================
@@ -922,7 +912,7 @@ with nav[3]:
         .reset_index()
         .sort_values("AbsAmount", ascending=False)
     )
-    st.dataframe(pivot, width='stretch')
+    st.dataframe(pivot, width="stretch")
 
     st.markdown("### Top Merchants (absolute spend)")
     merch = (
@@ -933,7 +923,7 @@ with nav[3]:
         .sort_values("AbsAmount", ascending=False)
         .head(30)
     )
-    st.dataframe(merch, width='stretch')
+    st.dataframe(merch, width="stretch")
 
     st.markdown("### FX fees")
     fx = d[d.get("Has FX", False) == True].copy()
@@ -950,7 +940,7 @@ with nav[3]:
     if len(ap) > 0:
         st.dataframe(
             ap[["Transaction date", "Merchant", "Original Description", "Amount", "Assistant", "Notes"]].head(200),
-            width='stretch',
+            width="stretch",
         )
 
     with st.expander("Optional: rules snapshot (hidden by default)", expanded=False):
