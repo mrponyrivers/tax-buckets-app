@@ -12,10 +12,5 @@ Upload or paste bank/credit-card statements → auto-categorize with rules → r
 - Reports: spend by category, top merchants, FX fees, assistant pay totals
 
 ## Run locally
-```bash
 pip install -r requirements.txt
 streamlit run app.py
-
-```
-
-```
