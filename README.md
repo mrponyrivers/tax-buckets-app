@@ -38,6 +38,30 @@ Tip: Try adding a new rule in the **Rules** tab (ex: keyword “uber”) and re-
 - Reports: spend by category, top merchants, FX fees, assistant pay totals
 
 ---
+## Tech stack
+- Python, Streamlit
+- pandas (data wrangling)
+- pdfplumber (PDF text extraction)
+- openpyxl (Excel export)
+
+## How it works
+1) Import statement text (paste) or upload CSV/XLSX/PDF  
+2) Parser extracts transactions into a normalized table  
+3) Rules engine assigns Bucket/Category/Subcategory + confidence  
+4) Review screen lets you edit + override categories  
+5) Export either:
+   - Full categorized ledger (CSV/XLSX)
+   - QuickBooks-style bank feed (CSV/XLSX)
+
+## Privacy
+This app runs locally or on Streamlit Cloud and does **not** require connecting to any bank accounts.
+Use redacted statements for demos and avoid uploading sensitive personal info to public deployments.
+
+## Roadmap
+- Better PDF parsing for more statement formats
+- Rule suggestions from review edits
+- Per-client “projects” presets
+- Optional: chart exports (monthly spend, category trends)
 
 ## Screenshots
 ![App screenshot](docs/screenshot.png)
